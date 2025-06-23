@@ -92,6 +92,26 @@
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
         }
+        .find-button { /* Стиль для новой кнопки "Найти" */
+            background-color: #3a4a5a; /* Синий/серый цвет */
+            color: #d0d0d0;
+            border: 2px solid #4a5a6a;
+            font-size: 0.95rem; /* Меньше шрифт */
+            padding: 8px 15px; /* Меньше отступы */
+            width: auto; /* Автоматическая ширина */
+            float: right; /* Размещение справа */
+            margin-top: -5px; /* Поднимаем немного */
+            margin-bottom: 10px; /* Отступ снизу */
+            margin-right: 0;
+            border-radius: 6px;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .find-button:hover {
+            background-color: #4a5a6a;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
         .disclaimer {
             margin-top: 40px; /* Увеличенный отступ */
             font-size: 0.95rem; /* Чуть крупнее дисклеймер */
@@ -198,6 +218,7 @@
                 <span id="oldPathLength" class="length-counter">Длина: 0</span>
             </label>
             <input type="text" id="oldPathInput" placeholder="materials/models/mymodel/texture.vmt">
+            <button id="findPathButton" class="button find-button">Найти текущий путь</button>
         </div>
 
         <div class="mb-8">
@@ -231,6 +252,7 @@
             const oldPathInput = document.getElementById('oldPathInput');
             const newPathInput = document.getElementById('newPathInput');
             const processButton = document.getElementById('processButton');
+            const findPathButton = document.getElementById('findPathButton'); // New button
 
             const oldPathLengthSpan = document.getElementById('oldPathLength');
             const newPathLengthSpan = document.getElementById('newPathLength');
@@ -276,6 +298,59 @@
                     hideModal();
                 }
             });
+
+            // Function to find common string paths in the file
+            findPathButton.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                if (!file) {
+                    showModal('Ошибка', 'Пожалуйста, выберите файл MDL или ANI, чтобы найти пути.', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const arrayBuffer = event.target.result;
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    const decoder = new TextDecoder('windows-1251'); // Source Engine often uses this encoding
+
+                    // Attempt to decode a large chunk of the file as text
+                    // This is heuristic and might not yield perfect results for all binary files
+                    const textContent = decoder.decode(uint8Array);
+
+                    // Common path patterns in Source Engine
+                    const commonPathPatterns = [
+                        /(materials\/[a-zA-Z0-9\/_\-]+\.vmt)/g,
+                        /(models\/[a-zA-Z0-9\/_\-]+\.(mdl|vtf|vtx|phy))/g,
+                        /([a-zA-Z0-9\/_\-]+)\.(mdl|ani)/g // More general path
+                    ];
+
+                    let foundPath = null;
+
+                    for (const pattern of commonPathPatterns) {
+                        const matches = textContent.match(pattern);
+                        if (matches && matches.length > 0) {
+                            foundPath = matches[0]; // Take the first match
+                            break; // Stop after finding the first plausible path
+                        }
+                    }
+
+                    if (foundPath) {
+                        oldPathInput.value = foundPath;
+                        updateLengthCounters();
+                        showModal('Путь найден', `Найден путь: "${foundPath}". Он был вставлен в поле "Старый путь".`, 'success');
+                    } else {
+                        showModal('Путь не найден', 'В файле не удалось найти распространенные пути к моделям или материалам. Пожалуйста, введите путь вручную.', 'error');
+                    }
+
+                };
+
+                reader.onerror = function() {
+                    showModal('Ошибка чтения', 'Ошибка при чтении файла для поиска путей.', 'error');
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
+
 
             processButton.addEventListener('click', () => {
                 const file = fileInput.files[0];
