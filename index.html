@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактор путей MDL/ANI файлов Source Engine</title>
+    <title>Source Engine Tools</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
@@ -29,457 +29,123 @@
             border-radius: 12px;
             box-shadow: 0 0 25px rgba(0, 0, 0, 0.5), 0 0 10px #ff8c0066;
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
             text-align: center;
             border: 1px solid #3a4a5a;
         }
         h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 30px;
             color: #ff8c00;
-            text-shadow: 0 0 8px #ff8c0088;
+            text-shadow: 0 0 10px #ff8c0088;
         }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 500;
-            color: #b0b0b0;
-            text-align: left;
-            font-size: 1.1rem;
-        }
-        input[type="file"],
-        input[type="text"] {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 25px;
-            border-radius: 6px;
-            border: 1px solid #3a4a5a;
-            background-color: #1f1f1f;
-            color: #d0d0d0;
-            box-sizing: border-box;
-            font-size: 1.05rem;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
-        }
-        input[type="file"]::file-selector-button {
-            background-color: #3a4a5a;
-            color: #d0d0d0;
-            padding: 10px 15px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out;
-            font-family: 'Share Tech Mono', monospace;
-        }
-        input[type="file"]::file-selector-button:hover {
-            background-color: #4a5a6a;
-        }
-        button {
-            background-color: #ff8c00;
-            color: #1a1a1a;
-            padding: 15px 30px;
-            border-radius: 8px;
-            border: 2px solid #ffa500;
-            cursor: pointer;
-            font-size: 1.2rem;
+        h2 {
+            font-size: 1.8rem;
             font-weight: bold;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
-            width: 100%;
-            text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+            margin-top: 35px;
+            margin-bottom: 20px;
+            color: #63b3ed;
+            text-shadow: 0 0 5px #63b3ed88;
         }
-        button:hover {
-            background-color: #ffa500;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
-        .find-button {
-            background-color: #3a4a5a;
-            color: #d0d0d0;
-            border: 2px solid #4a5a6a;
-            font-size: 0.95rem;
-            padding: 8px 15px;
-            width: auto;
-            float: right;
-            margin-top: -5px;
+        .app-card {
+            background-color: #1f1f1f;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #303030;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            text-align: left;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7), 0 0 15px #ff8c00aa;
+        }
+        .app-card h3 {
+            font-size: 1.5rem;
+            color: #ff8c00;
             margin-bottom: 10px;
-            margin-right: 0;
-            border-radius: 6px;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
         }
-        .find-button:hover {
-            background-color: #4a5a6a;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .disclaimer {
-            margin-top: 40px;
+        .app-card p {
             font-size: 0.95rem;
-            color: #808080;
-            text-align: justify;
+            color: #b0b0b0;
+            margin-bottom: 15px;
+        }
+        .app-card .view-button {
+            display: inline-block;
+            background-color: #63b3ed;
+            color: #1a1a1a;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 2px solid #4299e1;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            width: 100%;
+        }
+        .app-card .view-button:hover {
+            background-color: #4299e1;
+            transform: translateY(-2px);
+        }
+        .info-block {
             background-color: #1f1f1f;
             padding: 20px;
             border-radius: 10px;
             border: 1px solid #303030;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-            backdrop-filter: blur(3px);
-        }
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background-color: #2a2a2a;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), 0 0 15px #ff8c0088;
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            position: relative;
-            border: 1px solid #3a4a5a;
-        }
-        .modal-content h2 {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #ff8c00;
-            text-shadow: 0 0 5px #ff8c0088;
-        }
-        .modal-content p {
-            margin-bottom: 25px;
-            color: #d0d0d0;
-            font-size: 1.1rem;
-        }
-        .modal-content button {
-            background-color: #ff8c00;
-            color: #1a1a1a;
-            padding: 12px 25px;
-            border-radius: 6px;
-            border: 1px solid #ffa500;
-            cursor: pointer;
-            font-size: 1.05rem;
-            font-weight: 600;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            width: auto;
-            min-width: 100px;
-            box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
-        }
-        .modal-content button:hover {
-            background-color: #ffa500;
-            transform: translateY(-1px);
-            box-shadow: 0 0 12px rgba(255, 140, 0, 0.6);
-        }
-        .modal-content.success h2 { color: #48bb78; text-shadow: 0 0 5px rgba(72, 187, 120, 0.5); }
-        .modal-content.error h2 { color: #e53e3e; text-shadow: 0 0 5px rgba(229, 62, 62, 0.5); }
-
-        .length-counter {
-            font-size: 0.9rem;
+            text-align: left;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-top: 40px;
             color: #808080;
-            float: right;
-            margin-top: -15px;
-            margin-right: 5px;
-            background-color: #1f1f1f;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid #303030;
+        }
+        .info-block strong {
+            color: #ff8c00;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Source Engine MDL/ANI Редактор Путей</h1>
+        <h1>Инструменты для Source Engine</h1>
 
-        <div class="mb-5">
-            <label for="fileInput">Выберите MDL/ANI файл:</label>
-            <input type="file" id="fileInput" accept=".mdl,.ani">
+        <div class="info-block">
+            <p>Добро пожаловать на мой сайт, где я включаю инструменты, которые я сделал для упрощения разработки source модификаций. Возможно буду обновлять и добавлять инструменты.</p>
         </div>
 
-        <div class="mb-5">
-            <label for="oldPathInput">
-                Старый путь к модели (полный путь):
-                <span id="oldPathLength" class="length-counter">Длина: 0</span>
-            </label>
-            <input type="text" id="oldPathInput" placeholder="models/test/anims.mdl">
-            <button id="findPathButton" class="button find-button">Найти текущий путь</button>
+        <h2>Source Engine Инструменты</h2>
+        <div class="app-grid">
+            <div class="app-card">
+                <h3>MDL/ANI Редактор Путей</h3>
+                <p>Инструмент для изменения путей к моделям и анимациям внутри MDL/ANI файлов Source Engine без декомпиляции.</p>
+                <a href="./mdlpath.html" class="view-button">Открыть Редактор</a>
+            </div>
+            <!-- Добавляйте новые приложения сюда, скопировав блок app-card -->
+            <!--
+            <div class="app-card">
+                <h3>Пример Приложения 2</h3>
+                <p>Краткое описание второго приложения.</p>
+                <a href="./app2.html" class="view-button">Открыть Приложение 2</a>
+            </div>
+            -->
         </div>
 
-        <div class="mb-8">
-            <label for="newPathInput">
-                Новый путь к модели (должен быть такой же длины или короче):
-                <span id="newPathLength" class="length-counter">Длина: 0</span>
-            </label>
-            <input type="text" id="newPathInput" placeholder="models/new/anims.mdl">
+        <!-- Вы можете добавить больше категорий ниже -->
+        <!--
+        <h2>Другие Инструменты</h2>
+        <div class="app-grid">
+            <div class="app-card">
+                <h3>Пример Приложения 3</h3>
+                <p>Краткое описание третьего приложения.</p>
+                <a href="./app3.html" class="view-button">Открыть Приложение 3</a>
+            </div>
         </div>
-
-        <button id="processButton">Изменить и Скачать</button>
-
-        <div class="disclaimer">
-            <p><strong>Важное примечание:</strong> Это приложение является демонстрацией и имеет серьезные ограничения. Оно может заменить строку пути к модели только в том случае, если <strong>новый путь имеет такую же длину или короче</strong>, чем старый. Если новый путь длиннее, точное бинарное редактирование без повреждения файла становится чрезвычайно сложным и требует пересчета всех смещений, что выходит за рамки возможностей этого простого веб-приложения. Для более надежной работы со Source Engine файлами рекомендуется использовать специализированные инструменты, такие как <strong>Crowbar</strong>.</p>
-            <p class="mt-3">Всегда делайте резервные копии оригинальных файлов перед использованием этого или любого подобного инструмента.</p>
-        </div>
+        -->
     </div>
-
-    <div id="modalOverlay" class="modal-overlay">
-        <div id="modalContent" class="modal-content">
-            <h2 id="modalTitle"></h2>
-            <p id="modalMessage"></p>
-            <button id="modalCloseButton">ОК</button>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const fileInput = document.getElementById('fileInput');
-            const oldPathInput = document.getElementById('oldPathInput');
-            const newPathInput = document.getElementById('newPathInput');
-            const processButton = document.getElementById('processButton');
-            const findPathButton = document.getElementById('findPathButton');
-
-            const oldPathLengthSpan = document.getElementById('oldPathLength');
-            const newPathLengthSpan = document.getElementById('newPathLength');
-
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalContent = document.getElementById('modalContent');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalCloseButton = document.getElementById('modalCloseButton');
-
-            function showModal(title, msg, type) {
-                modalTitle.textContent = title;
-                modalMessage.textContent = msg;
-                modalContent.className = `modal-content ${type}`;
-                modalOverlay.classList.add('show');
-            }
-
-            function hideModal() {
-                modalOverlay.classList.remove('show');
-            }
-
-            function updateLengthCounters() {
-                oldPathLengthSpan.textContent = `Длина: ${oldPathInput.value.length}`;
-                newPathLengthSpan.textContent = `Длина: ${newPathInput.value.length}`;
-            }
-
-            oldPathInput.addEventListener('input', updateLengthCounters);
-            newPathInput.addEventListener('input', updateLengthCounters);
-
-            updateLengthCounters();
-
-            modalCloseButton.addEventListener('click', hideModal);
-            modalOverlay.addEventListener('click', (event) => {
-                if (event.target === modalOverlay) {
-                    hideModal();
-                }
-            });
-
-            findPathButton.addEventListener('click', () => {
-                const file = fileInput.files[0];
-                if (!file) {
-                    showModal('Ошибка', 'Пожалуйста, выберите файл MDL или ANI, чтобы найти пути.', 'error');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const arrayBuffer = event.target.result;
-                    const uint8Array = new Uint8Array(arrayBuffer);
-                    const decoder = new TextDecoder('windows-1251');
-
-                    const textContent = decoder.decode(uint8Array);
-
-                    const commonPathPatterns = [
-                        /(models\/[a-zA-Z0-9\/_\-]+\.(mdl|ani|vtf|vtx|phy))/g,
-                        /([a-zA-Z0-9\/_\-]+\.(mdl|ani))/g, // More general, no leading 'models/'
-                        /(materials\/[a-zA-Z0-9\/_\-]+\.vmt)/g
-                    ];
-
-                    let foundMdlPath = null;
-                    let foundAniPath = null;
-                    let foundOtherPath = null;
-
-                    for (const pattern of commonPathPatterns) {
-                        const matches = [...textContent.matchAll(pattern)];
-                        for (const match of matches) {
-                            const path = match[0];
-                            if (path.toLowerCase().endsWith('.mdl')) {
-                                foundMdlPath = path;
-                                break;
-                            } else if (path.toLowerCase().endsWith('.ani')) {
-                                if (!foundAniPath) foundAniPath = path;
-                            } else {
-                                if (!foundOtherPath) foundOtherPath = path;
-                            }
-                        }
-                        if (foundMdlPath) break;
-                    }
-
-                    if (foundMdlPath) {
-                        oldPathInput.value = foundMdlPath;
-                        updateLengthCounters();
-                        showModal('Путь найден', `Найден путь: "${foundMdlPath}" (MDL). Он был вставлен в поле "Старый путь".`, 'success');
-                    } else if (foundAniPath) {
-                        oldPathInput.value = foundAniPath;
-                        updateLengthCounters();
-                        showModal('Путь найден', `Найден путь: "${foundAniPath}" (ANI). Он был вставлен в поле "Старый путь". Если вы хотите изменить путь MDL, введите его вручную.`, 'success');
-                    } else if (foundOtherPath) {
-                        oldPathInput.value = foundOtherPath;
-                        updateLengthCounters();
-                        showModal('Путь найден', `Найден путь: "${foundOtherPath}". Он был вставлен в поле "Старый путь". Если это не нужный путь, введите его вручную.`, 'success');
-                    } else {
-                        showModal('Путь не найден', 'В файле не удалось найти распространенные пути к моделям или материалам. Пожалуйста, введите путь вручную.', 'error');
-                    }
-                };
-
-                reader.onerror = function() {
-                    showModal('Ошибка чтения', 'Ошибка при чтении файла для поиска путей.', 'error');
-                };
-
-                reader.readAsArrayBuffer(file);
-            });
-
-            processButton.addEventListener('click', () => {
-                const file = fileInput.files[0];
-                const oldPath = oldPathInput.value;
-                const newPath = newPathInput.value;
-
-                if (!file) {
-                    showModal('Ошибка', 'Пожалуйста, выберите файл MDL или ANI.', 'error');
-                    return;
-                }
-                if (!oldPath) {
-                    showModal('Ошибка', 'Пожалуйста, введите старый путь к модели.', 'error');
-                    return;
-                }
-                if (!newPath) {
-                    showModal('Ошибка', 'Пожалуйста, введите новый путь к модели.', 'error');
-                    return;
-                }
-
-                if (newPath.length > oldPath.length) {
-                    showModal('Ошибка длины пути', 'Новый путь длиннее старого. Это приложение не поддерживает такие изменения. Пожалуйста, введите путь такой же длины или короче.', 'error');
-                    return;
-                }
-
-                const reader = new FileReader();
-
-                reader.onload = function(event) {
-                    const arrayBuffer = event.target.result;
-                    const uint8Array = new Uint8Array(arrayBuffer);
-
-                    const encoder = new TextEncoder();
-                    const oldPathBytes = encoder.encode(oldPath);
-                    const newPathBytes = encoder.encode(newPath);
-
-                    let found = false;
-                    let replacementsCount = 0;
-
-                    const originalFileName = file.name;
-                    const isMdlFile = originalFileName.toLowerCase().endsWith('.mdl');
-
-                    let oldAniPath = null;
-                    let newAniPath = null;
-
-                    if (isMdlFile) {
-                        if (oldPath.toLowerCase().endsWith('.mdl')) {
-                            oldAniPath = oldPath.slice(0, -4) + '.ani';
-                        }
-                        if (newPath.toLowerCase().endsWith('.mdl')) {
-                            newAniPath = newPath.slice(0, -4) + '.ani';
-                        }
-                    }
-
-                    for (let i = 0; i <= uint8Array.length - oldPathBytes.length; i++) {
-                        let match = true;
-                        for (let j = 0; j < oldPathBytes.length; j++) {
-                            if (uint8Array[i + j] !== oldPathBytes[j]) {
-                                match = false;
-                                break;
-                            }
-                        }
-
-                        if (match) {
-                            found = true;
-                            replacementsCount++;
-                            for (let k = 0; k < newPathBytes.length; k++) {
-                                uint8Array[i + k] = newPathBytes[k];
-                            }
-                            for (let k = newPathBytes.length; k < oldPathBytes.length; k++) {
-                                uint8Array[i + k] = 0x00;
-                            }
-                        }
-                    }
-
-                    if (isMdlFile && oldAniPath && newAniPath) {
-                        const oldAniPathBytes = encoder.encode(oldAniPath);
-                        const newAniPathBytes = encoder.encode(newAniPath);
-
-                        if (newAniPathBytes.length <= oldAniPathBytes.length) {
-                             for (let i = 0; i <= uint8Array.length - oldAniPathBytes.length; i++) {
-                                let match = true;
-                                for (let j = 0; j < oldAniPathBytes.length; j++) {
-                                    if (uint8Array[i + j] !== oldAniPathBytes[j]) {
-                                        match = false;
-                                        break;
-                                    }
-                                }
-
-                                if (match) {
-                                    found = true;
-                                    replacementsCount++;
-                                    for (let k = 0; k < newAniPathBytes.length; k++) {
-                                        uint8Array[i + k] = newAniPathBytes[k];
-                                    }
-                                    for (let k = newAniPathBytes.length; k < oldAniPathBytes.length; k++) {
-                                        uint8Array[i + k] = 0x00;
-                                    }
-                                }
-                            }
-                        } else {
-                            showModal('Внимание', `Обнаружен связанный ANI путь (${oldAniPath}), но новый путь для него (${newAniPath}) длиннее старого. Он не был изменен.`, 'error');
-                        }
-                    }
-
-                    if (found) {
-                        const modifiedBlob = new Blob([uint8Array], { type: 'application/octet-stream' });
-                        const url = URL.createObjectURL(modifiedBlob);
-
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `modified_${file.name}`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-
-                        showModal('Успешно!', `Файл успешно изменен и скачан. Заменено вхождений: ${replacementsCount}.`, 'success');
-                    } else {
-                        showModal('Путь не найден', 'Указанный старый путь не найден в файле. Файл не изменен.', 'error');
-                    }
-                };
-
-                reader.onerror = function() {
-                    showModal('Ошибка чтения', 'Ошибка при чтении файла.', 'error');
-                };
-
-                reader.readAsArrayBuffer(file);
-            });
-        });
-    </script>
 </body>
 </html>
