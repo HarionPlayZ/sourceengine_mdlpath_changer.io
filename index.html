@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор путей MDL/ANI файлов Source Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Share Tech Mono', monospace; /* Более "технологичный" шрифт */
+            background-color: #1a1a1a; /* Очень темный фон */
+            color: #d0d0d0; /* Светло-серый текст */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 10px 10px; /* Сетка как намек на HUD */
+        }
+        .container {
+            background-color: #2a2a2a; /* Темный фон контейнера */
+            padding: 40px; /* Увеличенный отступ */
+            border-radius: 12px; /* Меньше округления */
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5), 0 0 10px #ff8c0066; /* Небольшой оранжевый "цифровой" свет */
+            width: 100%;
+            max-width: 700px; /* Шире контейнер */
+            text-align: center;
+            border: 1px solid #3a4a5a; /* Мягкая синеватая рамка */
+        }
+        h1 {
+            font-size: 2.2rem; /* Увеличенный заголовок */
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #ff8c00; /* Оранжевый акцент */
+            text-shadow: 0 0 8px #ff8c0088;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px; /* Увеличенный отступ */
+            font-weight: 500;
+            color: #b0b0b0; /* Светлее серый текст метки */
+            text-align: left;
+            font-size: 1.1rem; /* Крупнее метки */
+        }
+        input[type="file"],
+        input[type="text"] {
+            width: 100%;
+            padding: 14px; /* Увеличенный отступ */
+            margin-bottom: 25px; /* Увеличенный отступ */
+            border-radius: 6px;
+            border: 1px solid #3a4a5a; /* Синеватый бордюр */
+            background-color: #1f1f1f; /* Еще темнее фон поля ввода */
+            color: #d0d0d0;
+            box-sizing: border-box;
+            font-size: 1.05rem; /* Крупнее текст в полях */
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #3a4a5a;
+            color: #d0d0d0;
+            padding: 10px 15px; /* Увеличенный отступ кнопки выбора файла */
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #4a5a6a;
+        }
+        button {
+            background-color: #ff8c00; /* Оранжевая кнопка */
+            color: #1a1a1a; /* Темный текст на кнопке */
+            padding: 15px 30px; /* Увеличенный отступ */
+            border-radius: 8px;
+            border: 2px solid #ffa500; /* Чуть более яркий оранжевый бордюр */
+            cursor: pointer;
+            font-size: 1.2rem; /* Крупнее текст кнопки */
+            font-weight: bold;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
+            width: 100%;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+        }
+        button:hover {
+            background-color: #ffa500; /* Более яркий оранжевый при наведении */
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+        }
+        .disclaimer {
+            margin-top: 40px; /* Увеличенный отступ */
+            font-size: 0.95rem; /* Чуть крупнее дисклеймер */
+            color: #808080; /* Темнее серый для дисклеймера */
+            text-align: justify;
+            background-color: #1f1f1f;
+            padding: 20px; /* Увеличенный отступ */
+            border-radius: 10px;
+            border: 1px solid #303030;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); /* Более темный оверлей */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            backdrop-filter: blur(3px); /* Размытие фона */
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #2a2a2a;
+            padding: 30px; /* Увеличенный отступ */
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), 0 0 15px #ff8c0088; /* Более выраженная тень/свечение */
+            max-width: 450px; /* Шире модальное окно */
+            width: 90%;
+            text-align: center;
+            position: relative;
+            border: 1px solid #3a4a5a;
+        }
+        .modal-content h2 {
+            font-size: 1.8rem; /* Крупнее заголовок модального окна */
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ff8c00; /* Оранжевый заголовок */
+            text-shadow: 0 0 5px #ff8c0088;
+        }
+        .modal-content p {
+            margin-bottom: 25px; /* Увеличенный отступ */
+            color: #d0d0d0;
+            font-size: 1.1rem; /* Крупнее текст сообщения */
+        }
+        .modal-content button {
+            background-color: #ff8c00;
+            color: #1a1a1a;
+            padding: 12px 25px; /* Увеличенный отступ */
+            border-radius: 6px;
+            border: 1px solid #ffa500;
+            cursor: pointer;
+            font-size: 1.05rem; /* Крупнее текст кнопки */
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            width: auto;
+            min-width: 100px; /* Минимальная ширина для кнопки */
+            box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+        }
+        .modal-content button:hover {
+            background-color: #ffa500;
+            transform: translateY(-1px);
+            box-shadow: 0 0 12px rgba(255, 140, 0, 0.6);
+        }
+        .modal-content.success h2 { color: #48bb78; text-shadow: 0 0 5px rgba(72, 187, 120, 0.5); } /* Зеленый для успеха */
+        .modal-content.error h2 { color: #e53e3e; text-shadow: 0 0 5px rgba(229, 62, 62, 0.5); }   /* Красный для ошибки */
+
+        /* Length counter styles */
+        .length-counter {
+            font-size: 0.9rem;
+            color: #808080;
+            float: right;
+            margin-top: -15px; /* Adjust position */
+            margin-right: 5px;
+            background-color: #1f1f1f;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #303030;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Source Engine MDL/ANI Редактор Путей</h1>
+
+        <div class="mb-5">
+            <label for="fileInput">Выберите MDL/ANI файл:</label>
+            <input type="file" id="fileInput" accept=".mdl,.ani">
+        </div>
+
+        <div class="mb-5">
+            <label for="oldPathInput">
+                Старый путь к модели (полный путь):
+                <span id="oldPathLength" class="length-counter">Длина: 0</span>
+            </label>
+            <input type="text" id="oldPathInput" placeholder="materials/models/mymodel/texture.vmt">
+        </div>
+
+        <div class="mb-8">
+            <label for="newPathInput">
+                Новый путь к модели (должен быть такой же длины или короче):
+                <span id="newPathLength" class="length-counter">Длина: 0</span>
+            </label>
+            <input type="text" id="newPathInput" placeholder="models/newmodel/newtexture.vmt">
+        </div>
+
+        <button id="processButton">Изменить и Скачать</button>
+
+        <div class="disclaimer">
+            <p><strong>Важное примечание:</strong> Это приложение является демонстрацией и имеет серьезные ограничения. Оно может заменить строку пути к модели только в том случае, если <strong>новый путь имеет такую же длину или короче</strong>, чем старый. Если новый путь длиннее, точное бинарное редактирование без повреждения файла становится чрезвычайно сложным и требует пересчета всех смещений, что выходит за рамки возможностей этого простого веб-приложения. Для более надежной работы со Source Engine файлами рекомендуется использовать специализированные инструменты, такие как <strong>Crowbar</strong>.</p>
+            <p class="mt-3">Всегда делайте резервные копии оригинальных файлов перед использованием этого или любого подобного инструмента.</p>
+        </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div id="modalContent" class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <button id="modalCloseButton">ОК</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('fileInput');
+            const oldPathInput = document.getElementById('oldPathInput');
+            const newPathInput = document.getElementById('newPathInput');
+            const processButton = document.getElementById('processButton');
+
+            const oldPathLengthSpan = document.getElementById('oldPathLength');
+            const newPathLengthSpan = document.getElementById('newPathLength');
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalContent = document.getElementById('modalContent');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalCloseButton = document.getElementById('modalCloseButton');
+
+            // Function to show the modal
+            function showModal(title, msg, type) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = msg;
+                modalContent.className = `modal-content ${type}`; // Add type class for styling
+                modalOverlay.classList.add('show');
+            }
+
+            // Function to hide the modal
+            function hideModal() {
+                modalOverlay.classList.remove('show');
+            }
+
+            // Update length counters
+            function updateLengthCounters() {
+                oldPathLengthSpan.textContent = `Длина: ${oldPathInput.value.length}`;
+                newPathLengthSpan.textContent = `Длина: ${newPathInput.value.length}`;
+            }
+
+            // Event listeners for input changes to update length counters
+            oldPathInput.addEventListener('input', updateLengthCounters);
+            newPathInput.addEventListener('input', updateLengthCounters);
+
+            // Initial update when page loads (in case of pre-filled values)
+            updateLengthCounters();
+
+
+            // Close modal when OK button is clicked
+            modalCloseButton.addEventListener('click', hideModal);
+            // Optionally close modal when clicking outside (on the overlay)
+            modalOverlay.addEventListener('click', (event) => {
+                if (event.target === modalOverlay) {
+                    hideModal();
+                }
+            });
+
+            processButton.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                const oldPath = oldPathInput.value;
+                const newPath = newPathInput.value;
+
+                if (!file) {
+                    showModal('Ошибка', 'Пожалуйста, выберите файл MDL или ANI.', 'error');
+                    return;
+                }
+                if (!oldPath) {
+                    showModal('Ошибка', 'Пожалуйста, введите старый путь к модели.', 'error');
+                    return;
+                }
+                if (!newPath) {
+                    showModal('Ошибка', 'Пожалуйста, введите новый путь к модели.', 'error');
+                    return;
+                }
+
+                if (newPath.length > oldPath.length) {
+                    showModal('Ошибка длины пути', 'Новый путь длиннее старого. Это приложение не поддерживает такие изменения. Пожалуйста, введите путь такой же длины или короче.', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                    const arrayBuffer = event.target.result;
+                    const uint8Array = new Uint8Array(arrayBuffer);
+
+                    // Convert old path string to byte array (ASCII/UTF-8 compatible)
+                    const encoder = new TextEncoder();
+                    const oldPathBytes = encoder.encode(oldPath);
+                    const newPathBytes = encoder.encode(newPath);
+
+                    let found = false;
+                    let replacementsCount = 0;
+
+                    // Iterate through the file byte by byte to find the old path
+                    for (let i = 0; i <= uint8Array.length - oldPathBytes.length; i++) {
+                        let match = true;
+                        for (let j = 0; j < oldPathBytes.length; j++) {
+                            if (uint8Array[i + j] !== oldPathBytes[j]) {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        if (match) {
+                            found = true;
+                            replacementsCount++;
+                            // Replace with new path bytes
+                            for (let k = 0; k < newPathBytes.length; k++) {
+                                uint8Array[i + k] = newPathBytes[k];
+                            }
+                            // Pad with null bytes if new path is shorter
+                            for (let k = newPathBytes.length; k < oldPathBytes.length; k++) {
+                                uint8Array[i + k] = 0x00; // Null byte
+                            }
+                            // Continue searching in case of multiple occurrences
+                        }
+                    }
+
+                    if (found) {
+                        // Create a new Blob from the modified ArrayBuffer
+                        const modifiedBlob = new Blob([uint8Array], { type: 'application/octet-stream' });
+                        const url = URL.createObjectURL(modifiedBlob);
+
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `modified_${file.name}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                        showModal('Успешно!', `Файл успешно изменен и скачан. Заменено вхождений: ${replacementsCount}.`, 'success');
+                    } else {
+                        // Explicit message when old path is not found
+                        showModal('Путь не найден', 'Указанный старый путь не найден в файле. Файл не изменен.', 'error');
+                    }
+                };
+
+                reader.onerror = function() {
+                    showModal('Ошибка чтения', 'Ошибка при чтении файла.', 'error');
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
+        });
+    </script>
+</body>
+</html>
