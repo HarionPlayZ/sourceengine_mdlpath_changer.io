@@ -305,24 +305,42 @@
 
                     const commonPathPatterns = [
                         /(models\/[a-zA-Z0-9\/_\-]+\.(mdl|ani|vtf|vtx|phy))/g,
-                        /(materials\/[a-zA-Z0-9\/_\-]+\.vmt)/g,
-                        /([a-zA-Z0-9\/_\-]+)\.(mdl|ani)/g
+                        /([a-zA-Z0-9\/_\-]+\.(mdl|ani))/g, // More general, no leading 'models/'
+                        /(materials\/[a-zA-Z0-9\/_\-]+\.vmt)/g
                     ];
 
-                    let foundPath = null;
+                    let foundMdlPath = null;
+                    let foundAniPath = null;
+                    let foundOtherPath = null;
 
                     for (const pattern of commonPathPatterns) {
-                        const matches = textContent.match(pattern);
-                        if (matches && matches.length > 0) {
-                            foundPath = matches[0];
-                            break;
+                        const matches = [...textContent.matchAll(pattern)];
+                        for (const match of matches) {
+                            const path = match[0];
+                            if (path.toLowerCase().endsWith('.mdl')) {
+                                foundMdlPath = path;
+                                break;
+                            } else if (path.toLowerCase().endsWith('.ani')) {
+                                if (!foundAniPath) foundAniPath = path;
+                            } else {
+                                if (!foundOtherPath) foundOtherPath = path;
+                            }
                         }
+                        if (foundMdlPath) break;
                     }
 
-                    if (foundPath) {
-                        oldPathInput.value = foundPath;
+                    if (foundMdlPath) {
+                        oldPathInput.value = foundMdlPath;
                         updateLengthCounters();
-                        showModal('Путь найден', `Найден путь: "${foundPath}". Он был вставлен в поле "Старый путь".`, 'success');
+                        showModal('Путь найден', `Найден путь: "${foundMdlPath}" (MDL). Он был вставлен в поле "Старый путь".`, 'success');
+                    } else if (foundAniPath) {
+                        oldPathInput.value = foundAniPath;
+                        updateLengthCounters();
+                        showModal('Путь найден', `Найден путь: "${foundAniPath}" (ANI). Он был вставлен в поле "Старый путь". Если вы хотите изменить путь MDL, введите его вручную.`, 'success');
+                    } else if (foundOtherPath) {
+                        oldPathInput.value = foundOtherPath;
+                        updateLengthCounters();
+                        showModal('Путь найден', `Найден путь: "${foundOtherPath}". Он был вставлен в поле "Старый путь". Если это не нужный путь, введите его вручную.`, 'success');
                     } else {
                         showModal('Путь не найден', 'В файле не удалось найти распространенные пути к моделям или материалам. Пожалуйста, введите путь вручную.', 'error');
                     }
@@ -373,15 +391,11 @@
 
                     const originalFileName = file.name;
                     const isMdlFile = originalFileName.toLowerCase().endsWith('.mdl');
-                    const isAniFile = originalFileName.toLowerCase().endsWith('.ani');
 
-                    // If it's an MDL file, also try to replace the associated ANI path
                     let oldAniPath = null;
                     let newAniPath = null;
 
                     if (isMdlFile) {
-                        // Attempt to infer the .ani path from the .mdl path
-                        // This is a common convention for Source Engine models with external animations
                         if (oldPath.toLowerCase().endsWith('.mdl')) {
                             oldAniPath = oldPath.slice(0, -4) + '.ani';
                         }
@@ -390,7 +404,6 @@
                         }
                     }
 
-                    // Perform replacement for the primary path (.mdl or .ani itself)
                     for (let i = 0; i <= uint8Array.length - oldPathBytes.length; i++) {
                         let match = true;
                         for (let j = 0; j < oldPathBytes.length; j++) {
@@ -412,7 +425,6 @@
                         }
                     }
 
-                    // If it's an MDL file and we've identified ANI paths, attempt to replace them too
                     if (isMdlFile && oldAniPath && newAniPath) {
                         const oldAniPathBytes = encoder.encode(oldAniPath);
                         const newAniPathBytes = encoder.encode(newAniPath);
@@ -442,7 +454,6 @@
                             showModal('Внимание', `Обнаружен связанный ANI путь (${oldAniPath}), но новый путь для него (${newAniPath}) длиннее старого. Он не был изменен.`, 'error');
                         }
                     }
-
 
                     if (found) {
                         const modifiedBlob = new Blob([uint8Array], { type: 'application/octet-stream' });
